@@ -1,92 +1,94 @@
-import { promises as fs } from 'fs';
 import path from 'path';
-import processImage from './image-processing'; // Image handling
+import { promises as fs } from 'fs';
 
-// query segments
-interface ImageQuery {
+
+import processImageResize from './image-processing'; // Image handling
+
+
+// Image Types 
+interface ImageQueryResize {
   filename?: string;
-  width?: string;
   height?: string;
+  width?: string;
 }
 
-export default class File {
-  // Default paths
-  static imagesFullPath = path.resolve(__dirname, '../assets/images/full');
+// images DirNames.
+ class File {
   static imagesThumbPath = path.resolve(__dirname, '../assets/images/thumb');
+  static imagesPath = path.resolve(__dirname, '../assets/images/full');
 
+  // Image path
   /**
-   * Determine image path.
-   * @param {ImageQuery} params Parameters.
+   * @param {ImageQueryResize} params Parameters.
    * @param {string} [params.filename] Filename.
-   * @param {string} [params.width] Desired width.
-   * @param {string} [params.height] Desired height.
+   * @param {string} [params.height]  height.
+   * @param {string} [params.width]  width.
    * @return {null|string} Path, if image available, else null.
    */
-  static async getImagePath(params: ImageQuery): Promise<null | string> {
-    if (!params.filename) {
-      return null;
-    }
 
-    const filePath: string =
+
+  static async getImageFullPath(params: ImageQueryResize): Promise<null | string> {
+    // Cheking if there is no file and return null 
+    if (!params.filename) return null ;
+
+
+    // Return File name And save it in file paths
+    const filePathName: string =
       params.width && params.height
         ? path.resolve(
             File.imagesThumbPath,
-            `${params.filename}-${params.width}x${params.height}.jpg`
+            `${params.filename}-${params.height}x${params.width}-${"fwd"}.jpg`
           )
-        : path.resolve(File.imagesFullPath, `${params.filename}.jpg`);
+        : path.resolve(File.imagesPath, `${params.filename}.jpg`);
 
     try {
-      await fs.access(filePath);
-      return filePath;
+      await fs.access(filePathName);
+      return filePathName;
     } catch {
       return null;
     }
   }
 
+
   /**
-   * Check if an image is available.
-   * @param {string} [filename=''] Filename (without file extension).
-   * @return {boolean} True if image is available, else false.
+   * Checking image is available.
+   * @param {string} [filename=''] (without file extension).
+   * @return {boolean}
    */
   static async isImageAvailable(filename: string = ''): Promise<boolean> {
-    if (!filename) {
-      return false; // Fail early
-    }
-
+    // if there is no file name return false 
+    if (!filename)  return false;
+    
     return (await File.getAvailableImageNames()).includes(filename);
   }
 
   /**
-   * Retrieve available image names.
-   * @return {string[]} Available image names (without file extension).
+   * @return {string[]} (without file extension).
    */
   static async getAvailableImageNames(): Promise<string[]> {
     try {
-      return (await fs.readdir(File.imagesFullPath)).map(
+      return (await fs.readdir(File.imagesPath)).map(
         (filename: string): string => filename.split('.')[0]
-      ); // Cut extension
+      );
     } catch {
       return [];
     }
   }
 
   /**
-   * Determine whether a thumb is already available.
-   * @param {ImageQuery} params Parameters.
+   * @param {ImageQueryResize} params Parameters.
    * @param {string} [params.filename] Filename.
-   * @param {string} [params.width] Desired width.
-   * @param {string} [params.height] Desired height.
+   * @param {string} [params.height]  height.
+   * @param {string} [params.width]  width.
    * @return {boolean} True, if thumb is available, else false.
    */
-  static async isThumbAvailable(params: ImageQuery): Promise<boolean> {
-    if (!params.filename || !params.width || !params.height) {
-      return false; // Fail early
-    }
+  static async isThumbAvailable(params: ImageQueryResize): Promise<boolean> {
+    if (!params.filename || !params.height || !params.width) return false; 
 
     // Set appropriate path
     const filePath: string = path.resolve(
       File.imagesThumbPath,
-      `${params.filename}-${params.width}x${params.height}.jpg`
+      `${params.filename}-${params.width}x${params.height}-${"fwd"}.jpg`
     );
 
     try {
@@ -97,44 +99,42 @@ export default class File {
     }
   }
 
-  /**
-   * Create thumb path.
-   */
+
+  //  Creating thumb path.
+
   static async createThumbPath(): Promise<void> {
     try {
       await fs.access(File.imagesThumbPath);
-      // Path already available
     } catch {
       fs.mkdir(File.imagesThumbPath);
     }
   }
 
   /**
-   * Create thumb file.
-   * @param {ImageQuery} params Parameters.
+   * @param {ImageQueryResize} params Parameters.
    * @param {string} [params.filename] Filename.
-   * @param {string} [params.width] Desired width.
-   * @param {string} [params.height] Desired height.
+   * @param {string} [params.height]  height.
+   * @param {string} [params.width]  width.
    * @return {null|string} Error message or null.
    */
-  static async createThumb(params: ImageQuery): Promise<null | string> {
+  static async createThumbImg(params: ImageQueryResize): Promise<null | string> {
     if (!params.filename || !params.width || !params.height) {
       return null; // Nothing to do
     }
 
     const filePathFull: string = path.resolve(
-      File.imagesFullPath,
+      File.imagesPath,
       `${params.filename}.jpg`
     );
     const filePathThumb: string = path.resolve(
       File.imagesThumbPath,
-      `${params.filename}-${params.width}x${params.height}.jpg`
+      `${params.filename}-${params.width}x${params.height}-${"fwd"}.jpg`
     );
 
     console.log(`Creating thumb ${filePathThumb}`);
 
     // Resize original image and store as thumb
-    return await processImage({
+    return await processImageResize({
       source: filePathFull,
       target: filePathThumb,
       width: parseInt(params.width),
@@ -142,3 +142,5 @@ export default class File {
     });
   }
 }
+
+export default File;

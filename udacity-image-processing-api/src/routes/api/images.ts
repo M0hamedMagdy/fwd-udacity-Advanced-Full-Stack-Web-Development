@@ -2,29 +2,26 @@ import express from 'express';
 import File from './../../file';
 
 // query segments
-interface ImageQuery {
+interface ImageQueryResize {
   filename?: string;
   width?: string;
   height?: string;
 }
 
 /**
- * Validate query.
- * @param {ImageQuery} query Query object passed by express.
+ * @param {ImageQueryResize} query Query object passed by express.
  * @return {null|string} Null if valid or error message.
  */
-const validate = async (query: ImageQuery): Promise<null | string> => {
+const validate = async (query: ImageQueryResize): Promise<null | string> => {
   // Checking if file is available
   if (!(await File.isImageAvailable(query.filename))) {
     const availableImageNames: string = (
       await File.getAvailableImageNames()
     ).join(', ');
-    return `Please provide a valid filename in the 'filename' query segment. Available filenames are: ${availableImageNames}.`;
+    return `Please provide a valid filename in the 'filename' . Available filenames are: ${availableImageNames}.`;
   }
 
-  if (!query.width && !query.height) {
-    return null; // No size provided
-  }
+  if (!query.width && !query.height) return null; 
 
   // Check if width is a valid value
   const width: number = parseInt(query.width || '');
@@ -60,7 +57,7 @@ images.get(
 
     // Create thumb if not yet available
     if (!(await File.isThumbAvailable(request.query))) {
-      error = await File.createThumb(request.query);
+      error = await File.createThumbImg(request.query);
     }
 
     // Handle image processing error
@@ -70,11 +67,11 @@ images.get(
     }
 
     // Retrieve appropriate image path and display image
-    const path: null | string = await File.getImagePath(request.query);
+    const path: null | string = await File.getImageFullPath(request.query);
     if (path) {
       response.sendFile(path);
     } else {
-      response.send('This should not have happened :-D What did you do?');
+      response.send('This should not have happened');
     }
   }
 );

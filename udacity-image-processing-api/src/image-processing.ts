@@ -1,6 +1,6 @@
 import sharp from 'sharp';
 
-interface sharpResizeParams {
+interface sharpResizeImgParams {
   source: string;
   target: string;
   width: number;
@@ -9,7 +9,7 @@ interface sharpResizeParams {
 
 /**
  * Process image via sharp.
- * @param {sharpResizeParams} params Parameters.
+ * @param {sharpResizeImgParams} params Parameters.
  * @param {string} params.source Source image path.
  * @param {string} params.target Target path.
  * @param {number} params.width Target width.
@@ -17,8 +17,8 @@ interface sharpResizeParams {
  * @return {null|string} Error message or null.
  */
 
-const processImage = async (
-  params: sharpResizeParams
+const processImageResize = async (
+  params: sharpResizeImgParams
 ): Promise<null | string> => {
   try {
     await sharp(params.source)
@@ -31,4 +31,4 @@ const processImage = async (
   }
 };
 
-export default processImage;
+export default processImageResize;

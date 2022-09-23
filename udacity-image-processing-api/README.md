@@ -23,27 +23,27 @@ Expected query arguments are:
 - _width_:
 - _height_:
 
-#### Example 1
+#### EndPoint 1
 
 http://localhost:3000/api/images
 Will display an error and list available image names
 
-#### Example 2
+#### EndPoint 2
 
 http://localhost:3000/api/images?filename=fjord
 Will display the original fjord image.
 
-#### Example 3
+#### EndPoint 3
 
 http://localhost:3000/api/images?filename=fjord&width=200&height=200
 Will resize the fjord image to 200 by 200 pixels and store the resulting image.
 
-#### Example 4
+#### EndPoint 4
 
 http://localhost:3000/api/images?filename=fjord&width=-200&height=200
 Invalid width parameter that will display an error.
 
-#### Example 5
+#### EndPoint 5
 
 http://localhost:3000/api/images?filename=fjord&width=200
 Missing height parameter that will display an error.

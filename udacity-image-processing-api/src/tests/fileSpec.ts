@@ -1,19 +1,20 @@
 import { promises as fs } from 'fs';
+
 import path from 'path';
 import File from './../file';
 
 describe('Testing image processing via Sharp', (): void => {
-  it('An error (invalid width value)', async (): Promise<void> => {
-    const error: null | string = await File.createThumb({
+  it('There is an error with width', async (): Promise<void> => {
+    const error: null | string = await File.createThumbImg({
       filename: 'test',
-      width: '-100',
-      height: '500'
+      width: '-1000',
+      height: '-1000'
     });
     expect(error).not.toBeNull();
   });
 
-  it('An error (filename does not exist)', async (): Promise<void> => {
-    const error: null | string = await File.createThumb({
+  it('there is an error with file name', async (): Promise<void> => {
+    const error: null | string = await File.createThumbImg({
       filename: 'test',
       width: '100',
       height: '500'
@@ -21,12 +22,12 @@ describe('Testing image processing via Sharp', (): void => {
     expect(error).not.toBeNull();
   });
 
-  it('succeeds to write resized thumb file (existing file, valid size values)', async (): Promise<void> => {
-    await File.createThumb({ filename: 'fjord', width: '99', height: '99' });
+  it('succeeds to Create resized thumb filename', async (): Promise<void> => {
+    await File.createThumbImg({ filename: 'fjord', height: '300', width: '300' });
 
     const resizedImagePath: string = path.resolve(
       File.imagesThumbPath,
-      `fjord-99x99.jpg`
+      `fjord-300x300-fwd.jpg`
     );
     let errorFile: null | string = '';
 
@@ -34,23 +35,23 @@ describe('Testing image processing via Sharp', (): void => {
       await fs.access(resizedImagePath);
       errorFile = null;
     } catch {
-      errorFile = 'File was not created';
+      errorFile = `File is not created`;
     }
 
     expect(errorFile).toBeNull();
   });
 });
 
-afterAll(async (): Promise<void> => {
+afterAll(async (): Promise<null | void> => {
   const resizedImagePath: string = path.resolve(
     File.imagesThumbPath,
-    'fjord-99x99.jpg'
+      `fjord-300x300-fwd.jpg`
   );
 
   try {
     await fs.access(resizedImagePath);
     fs.unlink(resizedImagePath);
   } catch {
-    // intentionally left blank
+    return null;
   }
 });
